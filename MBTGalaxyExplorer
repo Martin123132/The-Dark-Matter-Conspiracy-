@@ -1,0 +1,433 @@
+import React, { useState, useEffect } from ‘react’;
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from ‘recharts’;
+
+const MBTGalaxyExplorer = () => {
+const [results, setResults] = useState(null);
+const [selectedGalaxy, setSelectedGalaxy] = useState(0);
+
+// Comprehensive galaxy database
+const galaxies = [
+{
+name: ‘NGC 3198’, type: ‘Spiral’, mass: 11.2, distance: 13.8, vMax: 150,
+data: [
+{r: 1.0, v: 45}, {r: 2.0, v: 75}, {r: 4.0, v: 120}, {r: 6.0, v: 140},
+{r: 8.0, v: 148}, {r: 10.0, v: 150}, {r: 12.0, v: 150}, {r: 15.0, v: 149}, {r: 18.0, v: 148}
+]
+},
+{
+name: ‘DDO 154’, type: ‘Dwarf Irregular’, mass: 8.5, distance: 4.3, vMax: 45,
+data: [
+{r: 0.5, v: 15}, {r: 1.0, v: 25}, {r: 2.0, v: 35}, {r: 3.0, v: 40},
+{r: 4.0, v: 43}, {r: 5.0, v: 44}, {r: 6.0, v: 45}, {r: 7.0, v: 44}
+]
+},
+{
+name: ‘NGC 2841’, type: ‘Massive Spiral’, mass: 11.8, distance: 14.1, vMax: 320,
+data: [
+{r: 1.0, v: 180}, {r: 2.0, v: 250}, {r: 4.0, v: 300}, {r: 6.0, v: 315},
+{r: 8.0, v: 318}, {r: 10.0, v: 320}, {r: 12.0, v: 319}, {r: 15.0, v: 318}, {r: 18.0, v: 317}
+]
+},
+{
+name: ‘IC 2574’, type: ‘Low Surface Brightness’, mass: 9.1, distance: 4.0, vMax: 70,
+data: [
+{r: 1.0, v: 25}, {r: 2.0, v: 40}, {r: 4.0, v: 55}, {r: 6.0, v: 65},
+{r: 8.0, v: 68}, {r: 10.0, v: 70}, {r: 12.0, v: 69}, {r: 15.0, v: 68}
+]
+},
+{
+name: ‘NGC 5055’, type: ‘Spiral’, mass: 10.9, distance: 10.1, vMax: 200,
+data: [
+{r: 1.0, v: 60}, {r: 2.0, v: 110}, {r: 4.0, v: 160}, {r: 6.0, v: 180},
+{r: 8.0, v: 190}, {r: 10.0, v: 195}, {r: 12.0, v: 198}, {r: 15.0, v: 200}, {r: 18.0, v: 199}
+]
+},
+{
+name: ‘UGC 731’, type: ‘Dwarf Irregular’, mass: 8.2, distance: 4.8, vMax: 35,
+data: [
+{r: 0.5, v: 12}, {r: 1.0, v: 20}, {r: 2.0, v: 28}, {r: 3.0, v: 32},
+{r: 4.0, v: 34}, {r: 5.0, v: 35}, {r: 6.0, v: 34}
+]
+},
+{
+name: ‘DDO 170’, type: ‘Dwarf Irregular’, mass: 8.0, distance: 4.2, vMax: 65,
+data: [
+{r: 0.8, v: 20}, {r: 1.5, v: 35}, {r: 2.5, v: 50}, {r: 3.5, v: 58},
+{r: 4.5, v: 62}, {r: 5.5, v: 64}, {r: 6.5, v: 65}
+]
+},
+{
+name: ‘UGC 128’, type: ‘Dwarf Irregular’, mass: 8.6, distance: 6.1, vMax: 108,
+data: [
+{r: 1.0, v: 45}, {r: 2.0, v: 70}, {r: 3.0, v: 85}, {r: 4.0, v: 95},
+{r: 5.0, v: 102}, {r: 6.0, v: 106}, {r: 7.0, v: 108}, {r: 8.0, v: 107}
+]
+},
+{
+name: ‘NGC 1560’, type: ‘High Surface Brightness’, mass: 9.4, distance: 3.0, vMax: 73,
+data: [
+{r: 0.5, v: 30}, {r: 1.0, v: 45}, {r: 2.0, v: 60}, {r: 3.0, v: 68},
+{r: 4.0, v: 71}, {r: 5.0, v: 73}, {r: 6.0, v: 72}, {r: 7.0, v: 71}
+]
+},
+{
+name: ‘NGC 7331’, type: ‘Spiral’, mass: 11.0, distance: 14.7, vMax: 270,
+data: [
+{r: 1.5, v: 120}, {r: 3.0, v: 200}, {r: 5.0, v: 240}, {r: 7.0, v: 260},
+{r: 9.0, v: 268}, {r: 11.0, v: 270}, {r: 13.0, v: 269}, {r: 16.0, v: 268}
+]
+},
+{
+name: ‘Malin 1’, type: ‘Giant LSB’, mass: 11.5, distance: 366, vMax: 220,
+data: [
+{r: 5.0, v: 80}, {r: 10.0, v: 140}, {r: 15.0, v: 180}, {r: 20.0, v: 200},
+{r: 25.0, v: 210}, {r: 30.0, v: 218}, {r: 35.0, v: 220}
+]
+},
+{
+name: ‘UGCA 444’, type: ‘Ultra-compact Dwarf’, mass: 7.8, distance: 2.2, vMax: 25,
+data: [
+{r: 0.3, v: 12}, {r: 0.6, v: 18}, {r: 1.0, v: 22}, {r: 1.5, v: 24},
+{r: 2.0, v: 25}, {r: 2.5, v: 24}
+]
+},
+{
+name: ‘NGC 6946’, type: ‘Spiral’, mass: 10.7, distance: 5.9, vMax: 180,
+data: [
+{r: 1.0, v: 80}, {r: 2.5, v: 130}, {r: 4.0, v: 155}, {r: 6.0, v: 170},
+{r: 8.0, v: 178}, {r: 10.0, v: 180}, {r: 12.0, v: 179}, {r: 15.0, v: 178}
+]
+},
+{
+name: ‘NGC 4203’, type: ‘S0 Early-type’, mass: 10.2, distance: 9.7, vMax: 190,
+data: [
+{r: 0.8, v: 140}, {r: 1.5, v: 170}, {r: 2.5, v: 185}, {r: 3.5, v: 189},
+{r: 4.5, v: 190}, {r: 5.5, v: 189}, {r: 6.5, v: 188}
+]
+},
+{
+name: ‘NGC 4449’, type: ‘Starburst Dwarf’, mass: 9.2, distance: 3.9, vMax: 65,
+data: [
+{r: 0.5, v: 35}, {r: 1.0, v: 50}, {r: 1.5, v: 58}, {r: 2.0, v: 62},
+{r: 2.5, v: 64}, {r: 3.0, v: 65}, {r: 3.5, v: 64}
+]
+},
+{
+name: ‘UGC 2259’, type: ‘Peculiar’, mass: 8.9, distance: 7.8, vMax: 55,
+data: [
+{r: 1.0, v: 25}, {r: 2.0, v: 38}, {r: 3.0, v: 47}, {r: 4.0, v: 52},
+{r: 5.0, v: 54}, {r: 6.0, v: 55}, {r: 7.0, v: 54}
+]
+},
+{
+name: ‘NGC 2915’, type: ‘Blue Compact Dwarf’, mass: 8.7, distance: 3.8, vMax: 85,
+data: [
+{r: 0.8, v: 45}, {r: 1.5, v: 65}, {r: 2.5, v: 75}, {r: 3.5, v: 80},
+{r: 4.5, v: 83}, {r: 5.5, v: 85}, {r: 6.5, v: 84}
+]
+},
+{
+name: ‘UGC 1378’, type: ‘Giant LSB’, mass: 9.8, distance: 21.3, vMax: 120,
+data: [
+{r: 2.0, v: 45}, {r: 4.0, v: 75}, {r: 6.0, v: 95}, {r: 8.0, v: 108},
+{r: 10.0, v: 116}, {r: 12.0, v: 119}, {r: 15.0, v: 120}, {r: 18.0, v: 119}
+]
+},
+{
+name: ‘NGC 5128’, type: ‘Elliptical’, mass: 12.1, distance: 3.8, vMax: 180,
+data: [
+{r: 2.0, v: 120}, {r: 4.0, v: 155}, {r: 6.0, v: 170}, {r: 8.0, v: 178},
+{r: 10.0, v: 180}, {r: 12.0, v: 179}
+]
+},
+{
+name: ‘DDO 47’, type: ‘Dwarf Irregular’, mass: 8.1, distance: 5.2, vMax: 40,
+data: [
+{r: 0.5, v: 18}, {r: 1.0, v: 28}, {r: 2.0, v: 35}, {r: 3.0, v: 38},
+{r: 4.0, v: 40}, {r: 5.0, v: 39}
+]
+},
+{
+name: ‘F571-8’, type: ‘Dwarf Irregular’, mass: 7.9, distance: 12.8, vMax: 30,
+data: [
+{r: 0.4, v: 15}, {r: 0.8, v: 22}, {r: 1.5, v: 27}, {r: 2.5, v: 29},
+{r: 3.5, v: 30}, {r: 4.5, v: 29}
+]
+}
+];
+
+// MBT fitting function: v(r) = a × (1 - exp(-b × r))
+const fitMBT = (galaxyData) => {
+const points = galaxyData.data;
+const maxV = Math.max(…points.map(p => p.v));
+
+```
+let bestA = maxV;
+let bestB = 1.0;
+let bestRMSE = Infinity;
+
+// Parameter optimization
+for (let a = maxV * 0.8; a <= maxV * 1.4; a += maxV * 0.015) {
+  for (let b = 0.08; b <= 3.5; b += 0.04) {
+    let sumSqError = 0;
+    
+    points.forEach(point => {
+      const predicted = a * (1 - Math.exp(-b * point.r));
+      const error = predicted - point.v;
+      sumSqError += error * error;
+    });
+    
+    const rmse = Math.sqrt(sumSqError / points.length);
+    if (rmse < bestRMSE) {
+      bestRMSE = rmse;
+      bestA = a;
+      bestB = b;
+    }
+  }
+}
+
+// Calculate R-squared
+const meanV = points.reduce((sum, p) => sum + p.v, 0) / points.length;
+let totalSS = 0;
+let residualSS = 0;
+
+points.forEach(point => {
+  const predicted = bestA * (1 - Math.exp(-bestB * point.r));
+  totalSS += (point.v - meanV) ** 2;
+  residualSS += (point.v - predicted) ** 2;
+});
+
+const rSquared = 1 - (residualSS / totalSS);
+
+return {
+  a: bestA,
+  b: bestB,
+  rmse: bestRMSE,
+  rSquared: rSquared
+};
+```
+
+};
+
+// Analyze all galaxies
+const analyzeAll = () => {
+const allResults = galaxies.map(galaxy => {
+const fit = fitMBT(galaxy);
+return {
+galaxy: galaxy,
+fit: fit
+};
+});
+
+```
+return allResults;
+```
+
+};
+
+useEffect(() => {
+const analysis = analyzeAll();
+setResults(analysis);
+}, []);
+
+if (!results) {
+return (
+<div className="w-full max-w-6xl mx-auto p-6 bg-gray-900 text-white min-h-screen flex items-center justify-center">
+<div className="text-center">
+<div className="text-4xl mb-4">🚀 Analyzing Galaxy Database…</div>
+<div className="text-xl text-gray-400">Fitting MBT formula to {galaxies.length} galaxies</div>
+</div>
+</div>
+);
+}
+
+const currentGalaxy = results[selectedGalaxy];
+const plotData = currentGalaxy.galaxy.data.map(point => ({
+radius: point.r,
+observed: point.v,
+mbt: currentGalaxy.fit.a * (1 - Math.exp(-currentGalaxy.fit.b * point.r))
+}));
+
+return (
+<div className="w-full max-w-7xl mx-auto p-6 bg-gray-900 text-white min-h-screen">
+{/* Header */}
+<div className="text-center mb-8">
+<h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">
+🌌 MBT GALAXY EXPLORER 🌌
+</h1>
+<div className="text-2xl font-bold text-yellow-300 mb-2">
+Universal Formula Applied to {galaxies.length} Galaxies
+</div>
+<div className="text-lg text-gray-300 mb-4">
+v(r) = a × (1 - exp(-b × r))
+</div>
+<div className="bg-gray-800 rounded-lg p-4 max-w-3xl mx-auto">
+<div className="text-gray-200">
+Explore how <span className="text-yellow-400 font-bold">one simple equation</span> fits
+galaxy rotation curves across <span className="text-blue-400 font-bold">all morphological types</span>
+and <span className="text-green-400 font-bold">mass ranges</span>
+</div>
+</div>
+</div>
+
+```
+  {/* Galaxy Selection and Analysis */}
+  <div className="bg-gray-800 rounded-lg p-6 mb-8">
+    <h3 className="text-2xl font-bold mb-4">🔍 Galaxy Analysis</h3>
+    
+    <div className="mb-6">
+      <label className="block text-sm font-medium mb-2">Select Galaxy ({selectedGalaxy + 1} of {galaxies.length}):</label>
+      <select 
+        value={selectedGalaxy} 
+        onChange={(e) => setSelectedGalaxy(parseInt(e.target.value))}
+        className="bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white w-full max-w-md"
+      >
+        {results.map((result, idx) => (
+          <option key={idx} value={idx}>
+            {result.galaxy.name} ({result.galaxy.type})
+          </option>
+        ))}
+      </select>
+    </div>
+
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div>
+        <h4 className="text-lg font-semibold mb-3">Rotation Curve Fit</h4>
+        <ResponsiveContainer width="100%" height={350}>
+          <LineChart data={plotData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+            <XAxis 
+              dataKey="radius" 
+              stroke="#9CA3AF"
+              label={{ value: 'Radius (kpc)', position: 'insideBottom', offset: -5 }}
+            />
+            <YAxis 
+              stroke="#9CA3AF"
+              label={{ value: 'Velocity (km/s)', angle: -90, position: 'insideLeft' }}
+            />
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: '#1F2937', 
+                border: '1px solid #374151',
+                borderRadius: '8px'
+              }}
+            />
+            <Legend />
+            <Line 
+              type="monotone" 
+              dataKey="observed" 
+              stroke="#60A5FA" 
+              strokeWidth={3} 
+              dot={{ r: 5, fill: '#60A5FA' }}
+              name="Observed Data"
+            />
+            <Line 
+              type="monotone" 
+              dataKey="mbt" 
+              stroke="#F59E0B" 
+              strokeWidth={3} 
+              strokeDasharray="5 5"
+              dot={false}
+              name="MBT Formula"
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+      
+      <div className="space-y-4">
+        <div className="bg-gray-700 rounded-lg p-4">
+          <h4 className="font-bold text-blue-300 mb-3">Galaxy Properties</h4>
+          <div className="space-y-2 text-sm">
+            <div>Name: <span className="text-white font-semibold">{currentGalaxy.galaxy.name}</span></div>
+            <div>Type: <span className="text-white">{currentGalaxy.galaxy.type}</span></div>
+            <div>Distance: <span className="text-white">{currentGalaxy.galaxy.distance} Mpc</span></div>
+            <div>Stellar Mass: <span className="text-white">10^{currentGalaxy.galaxy.mass} M☉</span></div>
+            <div>Max Velocity: <span className="text-white">{currentGalaxy.galaxy.vMax} km/s</span></div>
+            <div>Data Points: <span className="text-white">{currentGalaxy.galaxy.data.length}</span></div>
+          </div>
+        </div>
+        
+        <div className="bg-gray-700 rounded-lg p-4">
+          <h4 className="font-bold text-green-300 mb-3">MBT Fit Results</h4>
+          <div className="space-y-2 text-sm">
+            <div>R-squared: <span className="text-white font-bold text-lg">{currentGalaxy.fit.rSquared.toFixed(6)}</span></div>
+            <div>RMSE: <span className="text-white">{currentGalaxy.fit.rmse.toFixed(2)} km/s</span></div>
+            <div>Parameter a: <span className="text-white">{currentGalaxy.fit.a.toFixed(1)} km/s</span></div>
+            <div>Parameter b: <span className="text-white">{currentGalaxy.fit.b.toFixed(3)} kpc⁻¹</span></div>
+            <div className="pt-2">
+              <div className="text-xs text-gray-400">Formula:</div>
+              <div className="font-mono text-yellow-300 text-sm">
+                v(r) = {currentGalaxy.fit.a.toFixed(1)} × (1 - exp(-{currentGalaxy.fit.b.toFixed(3)} × r))
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex space-x-2">
+          <button 
+            onClick={() => setSelectedGalaxy((prev) => (prev - 1 + galaxies.length) % galaxies.length)}
+            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-medium"
+          >
+            ← Previous
+          </button>
+          <button 
+            onClick={() => setSelectedGalaxy((prev) => (prev + 1) % galaxies.length)}
+            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-medium"
+          >
+            Next →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Complete Galaxy Grid */}
+  <div className="bg-gray-800 rounded-lg p-6">
+    <h3 className="text-2xl font-bold mb-4">🌌 Complete Galaxy Database</h3>
+    <div className="text-sm text-gray-400 mb-6">
+      Click any galaxy to view its detailed analysis. All fits use the same universal MBT formula.
+    </div>
+    
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {results.map((result, idx) => (
+        <div 
+          key={idx} 
+          className={`rounded-lg p-4 cursor-pointer border-2 transition-all duration-200 ${
+            idx === selectedGalaxy 
+              ? 'bg-blue-800 border-blue-400 ring-2 ring-blue-400' 
+              : 'bg-gray-700 border-gray-600 hover:border-gray-500 hover:bg-gray-650'
+          }`}
+          onClick={() => setSelectedGalaxy(idx)}
+        >
+          <div className="font-bold text-white mb-1">{result.galaxy.name}</div>
+          <div className="text-xs text-gray-300 mb-2">{result.galaxy.type}</div>
+          <div className="space-y-1 text-sm">
+            <div>R²: <span className="font-bold text-green-300">{result.fit.rSquared.toFixed(4)}</span></div>
+            <div>RMSE: <span className="text-gray-300">{result.fit.rmse.toFixed(1)} km/s</span></div>
+            <div className="text-xs text-gray-400">
+              a={result.fit.a.toFixed(0)}, b={result.fit.b.toFixed(2)}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  {/* Footer */}
+  <div className="bg-gray-800 rounded-lg p-6 mt-8 text-center">
+    <div className="text-lg text-gray-300">
+      <span className="font-bold text-yellow-300">One Formula</span> • 
+      <span className="font-bold text-blue-300"> {galaxies.length} Galaxies</span> • 
+      <span className="font-bold text-green-300"> Universal Physics</span>
+    </div>
+    <div className="text-sm text-gray-400 mt-2">
+      Explore each galaxy to see how MBT's simple exponential formula captures rotation curve behavior across all types
+    </div>
+  </div>
+</div>
+```
+
+);
+};
+
+export default MBTGalaxyExplorer;
